@@ -1,0 +1,501 @@
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Area,
+  AreaChart,
+} from "recharts";
+import {
+  MousePointer,
+  Globe,
+  Smartphone,
+  Download,
+  Calendar,
+  TrendingUp,
+  Users,
+  Eye,
+} from "lucide-react";
+import blink from "@/blink/client";
+import type { Link, LinkClick } from "@/types";
+
+interface AnalyticsProps {
+  className?: string;
+}
+
+export function Analytics({ className }: AnalyticsProps) {
+  const [links, setLinks] = useState<Link[]>([]);
+  const [clicks, setClicks] = useState<LinkClick[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState("7d");
+
+  const [stats, setStats] = useState({
+    totalClicks: 0,
+    uniqueClicks: 0,
+    totalLinks: 0,
+    avgClicksPerLink: 0,
+  });
+
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [timeRange]);
+
+  const loadAnalyticsData = async () => {
+    try {
+      const user = await blink.auth.me();
+
+      // Load user's links
+      const userLinks = await blink.db.links.list({
+        where: { userId: user.id },
+      });
+      setLinks(userLinks);
+
+      // Load clicks for these links
+      const allClicks = await blink.db.linkClicks.list({
+        orderBy: { clickedAt: "desc" },
+        limit: 1000, // Get more data for analytics
+      });
+
+      // Filter clicks for user's links
+      const linkIds = userLinks.map((link) => link.id);
+      const userClicks = allClicks.filter((click) =>
+        linkIds.includes(click.linkId)
+      );
+      setClicks(userClicks);
+
+      // Calculate stats
+      const totalClicks = userClicks.length;
+      const uniqueIPs = new Set(userClicks.map((click) => click.ipAddress))
+        .size;
+      const avgClicksPerLink =
+        userLinks.length > 0 ? totalClicks / userLinks.length : 0;
+
+      setStats({
+        totalClicks,
+        uniqueClicks: uniqueIPs,
+        totalLinks: userLinks.length,
+        avgClicksPerLink: Math.round(avgClicksPerLink * 10) / 10,
+      });
+    } catch (error) {
+      console.error("Error loading analytics:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Process click data for charts
+  const getClicksByDate = () => {
+    const days = 7;
+    const data = [];
+
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split("T")[0];
+
+      const clicksOnDate = clicks.filter((click) =>
+        click.clickedAt.startsWith(dateStr)
+      ).length;
+
+      data.push({
+        date: date.toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        }),
+        clicks: clicksOnDate,
+      });
+    }
+
+    return data;
+  };
+
+  const getTopLinks = () => {
+    return links
+      .sort((a, b) => Number(b.clickCount) - Number(a.clickCount))
+      .slice(0, 5)
+      .map((link) => ({
+        name: link.title || link.shortCode,
+        clicks: Number(link.clickCount),
+        url: link.originalUrl,
+      }));
+  };
+
+  const getClicksByCountry = () => {
+    const countryCounts: Record<string, number> = {};
+
+    clicks.forEach((click) => {
+      const country = click.country || "Unknown";
+      countryCounts[country] = (countryCounts[country] || 0) + 1;
+    });
+
+    return Object.entries(countryCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([country, clicks]) => ({ country, clicks }));
+  };
+
+  const getClicksByDevice = () => {
+    const deviceCounts: Record<string, number> = {};
+
+    clicks.forEach((click) => {
+      const device = click.deviceType || "Unknown";
+      deviceCounts[device] = (deviceCounts[device] || 0) + 1;
+    });
+
+    return Object.entries(deviceCounts).map(([device, clicks]) => ({
+      device,
+      clicks,
+      fill: getDeviceColor(device),
+    }));
+  };
+
+  const getDeviceColor = (device: string) => {
+    const colors: Record<string, string> = {
+      Desktop: "hsl(var(--chart-1))",
+      Mobile: "hsl(var(--chart-2))",
+      Tablet: "hsl(var(--chart-3))",
+      Unknown: "hsl(var(--muted))",
+    };
+    return colors[device] || "hsl(var(--chart-4))";
+  };
+
+  const clicksByDate = getClicksByDate();
+  const topLinks = getTopLinks();
+  const clicksByCountry = getClicksByCountry();
+  const clicksByDevice = getClicksByDevice();
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-2">
+                  <div className="h-4 bg-muted rounded w-1/2"></div>
+                  <div className="h-8 bg-muted rounded w-1/3"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={className}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Analytics</h1>
+            <p className="text-muted-foreground">
+              Track performance and insights for your links
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Select value={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Last 7 days</SelectItem>
+                <SelectItem value="30d">Last 30 days</SelectItem>
+                <SelectItem value="90d">Last 3 months</SelectItem>
+                <SelectItem value="1y">Last year</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <MousePointer className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  Total Clicks
+                </span>
+              </div>
+              <div className="mt-2">
+                <p className="text-2xl font-bold">{stats.totalClicks}</p>
+                <p className="text-xs text-muted-foreground">
+                  +12% from last week
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-accent" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  Unique Visitors
+                </span>
+              </div>
+              <div className="mt-2">
+                <p className="text-2xl font-bold">{stats.uniqueClicks}</p>
+                <p className="text-xs text-muted-foreground">
+                  {stats.totalClicks > 0
+                    ? Math.round((stats.uniqueClicks / stats.totalClicks) * 100)
+                    : 0}
+                  % unique rate
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  Avg. Clicks
+                </span>
+              </div>
+              <div className="mt-2">
+                <p className="text-2xl font-bold">{stats.avgClicksPerLink}</p>
+                <p className="text-xs text-muted-foreground">per link</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <Eye className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  Active Links
+                </span>
+              </div>
+              <div className="mt-2">
+                <p className="text-2xl font-bold">{stats.totalLinks}</p>
+                <p className="text-xs text-muted-foreground">total created</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts */}
+        <Tabs defaultValue="overview" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="geography">Geography</TabsTrigger>
+            <TabsTrigger value="devices">Devices</TabsTrigger>
+            <TabsTrigger value="referrers">Referrers</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Click Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={clicksByDate}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        className="opacity-30"
+                      />
+                      <XAxis dataKey="date" fontSize={12} />
+                      <YAxis fontSize={12} />
+                      <Tooltip />
+                      <Area
+                        dataKey="clicks"
+                        fill="hsl(var(--primary))"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={2}
+                        fillOpacity={0.2}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Performing Links</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {topLinks.length > 0 ? (
+                    <div className="space-y-3">
+                      {topLinks.map((link, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{link.name}</p>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {link.url}
+                            </p>
+                          </div>
+                          <Badge variant="secondary">
+                            {link.clicks} clicks
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-sm text-muted-foreground">
+                        No click data available yet
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="geography" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Clicks by Country
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {clicksByCountry.length > 0 ? (
+                  <div className="space-y-4">
+                    {clicksByCountry.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-medium">
+                            {index + 1}
+                          </div>
+                          <span className="font-medium">{item.country}</span>
+                        </div>
+                        <Badge variant="outline">{item.clicks} clicks</Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-sm text-muted-foreground">
+                      No geographic data available yet
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="devices" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Smartphone className="h-5 w-5" />
+                  Clicks by Device
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6 lg:grid-cols-2">
+                  {clicksByDevice.length > 0 ? (
+                    <>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <PieChart>
+                          <Pie
+                            data={clicksByDevice}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="clicks"
+                          >
+                            {clicksByDevice.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="space-y-3">
+                        {clicksByDevice.map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="w-4 h-4 rounded-full"
+                                style={{ backgroundColor: item.fill }}
+                              />
+                              <span className="font-medium">{item.device}</span>
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {item.clicks} clicks
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="col-span-2 text-center py-8">
+                      <Smartphone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-sm text-muted-foreground">
+                        No device data available yet
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="referrers" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Top Referrers</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-sm text-muted-foreground">
+                    Referrer data will appear here as your links get more clicks
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
