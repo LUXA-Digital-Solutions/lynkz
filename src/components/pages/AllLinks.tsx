@@ -70,7 +70,9 @@ export function AllLinks() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">All Links</h1>
-        <Button>Create New Link</Button>
+        <Button onClick={() => (window.location.hash = "links/new")}>
+          Create New Link
+        </Button>
       </div>
 
       <Card>
@@ -169,11 +171,28 @@ export function AllLinks() {
                             <Copy className="mr-2 h-4 w-4" />
                             Copy
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              alert(
+                                "Edit feature would be available in a real app"
+                              );
+                            }}
+                          >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  "Are you sure you want to delete this link? This action cannot be undone."
+                                )
+                              ) {
+                                alert("Link would be deleted in a real app");
+                              }
+                            }}
+                          >
                             <Trash className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>

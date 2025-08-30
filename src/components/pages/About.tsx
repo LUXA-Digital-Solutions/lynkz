@@ -86,10 +86,19 @@ export function About() {
             businesses with powerful analytics and insights.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gap-2">
+            <Button
+              size="lg"
+              className="gap-2"
+              onClick={() => (window.location.hash = "about#careers")}
+            >
               Join Our Team <ArrowRight className="h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" className="gap-2">
+            <Button
+              size="lg"
+              variant="outline"
+              className="gap-2"
+              onClick={() => (window.location.hash = "about#contact")}
+            >
               Contact Us <MessageCircle className="h-4 w-4" />
             </Button>
           </div>
@@ -194,7 +203,13 @@ export function About() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="outline" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      window.location.href = "mailto:support@lynkz.com";
+                    }}
+                  >
                     support@lynkz.com
                   </Button>
                 </CardContent>
@@ -210,7 +225,14 @@ export function About() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full">Start Chat</Button>
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      alert("Live chat would be initiated in a real app");
+                    }}
+                  >
+                    Start Chat
+                  </Button>
                 </CardContent>
               </Card>
             </div>

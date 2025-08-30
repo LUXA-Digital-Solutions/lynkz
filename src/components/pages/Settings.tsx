@@ -91,7 +91,17 @@ export function Settings() {
                       mockUser.email?.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <Button variant="outline">Change Avatar</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // In a real app, this would open a file picker
+                    alert(
+                      "This feature would open a file picker to change your avatar"
+                    );
+                  }}
+                >
+                  Change Avatar
+                </Button>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
@@ -130,7 +140,15 @@ export function Settings() {
                 <Label htmlFor="confirm">Confirm Password</Label>
                 <Input id="confirm" type="password" />
               </div>
-              <Button>Update Password</Button>
+              <Button
+                onClick={() => {
+                  alert(
+                    "This feature would update your password in a real app"
+                  );
+                }}
+              >
+                Update Password
+              </Button>
             </CardContent>
           </Card>
 
@@ -142,7 +160,20 @@ export function Settings() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="destructive">Delete Account</Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (
+                    confirm(
+                      "Are you sure you want to delete your account? This action cannot be undone."
+                    )
+                  ) {
+                    alert("Your account would be deleted in a real app");
+                  }
+                }}
+              >
+                Delete Account
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -191,19 +222,36 @@ export function Settings() {
               <div className="space-y-2">
                 <Label>Color Theme</Label>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <Card className="p-4 cursor-pointer border-2 border-primary">
+                  <Card
+                    className="p-4 cursor-pointer border-2 border-primary"
+                    onClick={() =>
+                      alert(
+                        "Theme would be set to Default Purple in a real app"
+                      )
+                    }
+                  >
                     <div className="space-y-2">
                       <div className="rounded-md bg-primary h-10" />
                       <p className="text-sm font-medium">Default Purple</p>
                     </div>
                   </Card>
-                  <Card className="p-4 cursor-pointer">
+                  <Card
+                    className="p-4 cursor-pointer"
+                    onClick={() =>
+                      alert("Theme would be set to Ocean Blue in a real app")
+                    }
+                  >
                     <div className="space-y-2">
                       <div className="rounded-md bg-blue-500 h-10" />
                       <p className="text-sm font-medium">Ocean Blue</p>
                     </div>
                   </Card>
-                  <Card className="p-4 cursor-pointer">
+                  <Card
+                    className="p-4 cursor-pointer"
+                    onClick={() =>
+                      alert("Theme would be set to Forest Green in a real app")
+                    }
+                  >
                     <div className="space-y-2">
                       <div className="rounded-md bg-green-500 h-10" />
                       <p className="text-sm font-medium">Forest Green</p>

@@ -165,6 +165,13 @@ export function Pricing() {
                     size="lg"
                     className="w-full gap-2"
                     variant={plan.popular ? "default" : "outline"}
+                    onClick={() => {
+                      if (plan.name === "Enterprise") {
+                        window.location.hash = "about";
+                      } else {
+                        window.location.hash = "links/new";
+                      }
+                    }}
                   >
                     {plan.name === "Enterprise"
                       ? "Contact Sales"
@@ -212,10 +219,18 @@ export function Pricing() {
               Choose your plan and start shortening links in minutes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="gap-2">
+              <Button
+                size="lg"
+                className="gap-2"
+                onClick={() => (window.location.hash = "links/new")}
+              >
                 Start for Free <Zap className="h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline">
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => (window.location.hash = "about")}
+              >
                 Contact Sales
               </Button>
             </div>

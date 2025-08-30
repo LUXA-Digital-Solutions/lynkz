@@ -108,10 +108,19 @@ export function Features() {
             powerful platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gap-2">
+            <Button
+              size="lg"
+              className="gap-2"
+              onClick={() => (window.location.hash = "links/new")}
+            >
               Get Started <Zap className="h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" className="gap-2">
+            <Button
+              size="lg"
+              variant="outline"
+              className="gap-2"
+              onClick={() => alert("Demo feature would be shown in a real app")}
+            >
               View Demo <QrCode className="h-4 w-4" />
             </Button>
           </div>
@@ -151,7 +160,11 @@ export function Features() {
               Join thousands of users who trust Lynkz for their link management
               needs.
             </p>
-            <Button size="lg" className="gap-2">
+            <Button
+              size="lg"
+              className="gap-2"
+              onClick={() => (window.location.hash = "links/new")}
+            >
               Start for Free <Zap className="h-4 w-4" />
             </Button>
           </div>

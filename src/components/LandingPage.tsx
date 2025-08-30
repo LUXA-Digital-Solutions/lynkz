@@ -155,13 +155,25 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               <span className="font-bold text-xl">Lynkz</span>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => (window.location.hash = "features")}
+              >
                 Features
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => (window.location.hash = "pricing")}
+              >
                 Pricing
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => (window.location.hash = "about")}
+              >
                 About
               </Button>
               <ThemeToggle />
