@@ -1,9 +1,8 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Link2,
   BarChart3,
@@ -11,8 +10,6 @@ import {
   Shield,
   Zap,
   Globe,
-  Users,
-  TrendingUp,
   ArrowRight,
   Check,
   Star,
@@ -167,6 +164,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               <Button variant="ghost" size="sm">
                 About
               </Button>
+              <ThemeToggle />
               <Button size="sm" onClick={onGetStarted}>
                 Get Started
               </Button>

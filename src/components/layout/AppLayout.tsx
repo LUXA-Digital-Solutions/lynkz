@@ -70,9 +70,16 @@ export function AppLayout({
     },
     {
       id: "links",
-      label: "Links",
+      label: "All Links",
       icon: Link,
       href: "#links",
+      protected: true,
+    },
+    {
+      id: "links/new",
+      label: "Create Link",
+      icon: Plus,
+      href: "#links/new",
       protected: true,
     },
     {
@@ -248,7 +255,11 @@ export function AppLayout({
                 <h1 className="text-xl font-semibold capitalize">
                   {currentPage}
                 </h1>
-                <Button size="sm" className="gap-2">
+                <Button
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => handleNavigation("#links/new")}
+                >
                   <Plus className="h-4 w-4" />
                   Shorten Link
                 </Button>
@@ -276,7 +287,11 @@ export function AppLayout({
                   {currentPage}
                 </h1>
               </div>
-              <Button size="sm" className="gap-2">
+              <Button
+                size="sm"
+                className="gap-2"
+                onClick={() => handleNavigation("#links/new")}
+              >
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Shorten</span>
               </Button>

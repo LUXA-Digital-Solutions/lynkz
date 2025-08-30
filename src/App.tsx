@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Dashboard } from "@/components/Dashboard";
-import { LinksManager } from "@/components/LinksManager";
 import { Analytics } from "@/components/Analytics";
 import { LandingPage } from "@/components/LandingPage";
 import { Features } from "@/components/pages/Features";
 import { Pricing } from "@/components/pages/Pricing";
 import { About } from "@/components/pages/About";
+import { NewLink } from "@/components/pages/NewLink";
+import { AllLinks } from "@/components/pages/AllLinks";
+import { Settings } from "@/components/pages/Settings";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -15,6 +17,8 @@ function App() {
     | "landing"
     | "dashboard"
     | "links"
+    | "links/new"
+    | "links/all"
     | "analytics"
     | "settings"
     | "features"
@@ -64,25 +68,15 @@ function App() {
       case "dashboard":
         return <Dashboard />;
       case "links":
-        return <LinksManager />;
+        return <AllLinks />;
+      case "links/new":
+        return <NewLink />;
+      case "links/all":
+        return <AllLinks />;
       case "analytics":
         return <Analytics />;
       case "settings":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold">Settings</h1>
-              <p className="text-muted-foreground">
-                Manage your account and preferences
-              </p>
-            </div>
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                Settings page coming soon...
-              </p>
-            </div>
-          </div>
-        );
+        return <Settings />;
       default:
         return <Dashboard />;
     }
