@@ -21,7 +21,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import blink from "@/blink/client";
+import { mockApi } from "@/mocks/api";
 import type { Link, LinkClick } from "@/types";
 
 interface DashboardProps {
@@ -45,40 +45,32 @@ export function Dashboard({ currentPage = "dashboard" }: DashboardProps) {
 
   const loadDashboardData = async () => {
     try {
-      const user = await blink.auth.me();
+      const user = await mockApi.auth.me();
 
       // Load user's links
-      const userLinks = await blink.db.links.list({
-        where: { userId: user.id },
-        orderBy: { createdAt: "desc" },
-        limit: 5,
-      });
-
-      setLinks(userLinks);
+      const userLinks = await mockApi.links.list({ userId: user.id });
+      // Take only the 5 most recent links
+      setLinks(userLinks.slice(0, 5));
 
       // Load recent clicks
-      const clicks = await blink.db.linkClicks.list({
-        orderBy: { clickedAt: "desc" },
-        limit: 10,
-      });
-      setRecentClicks(clicks);
+      const clicks = await mockApi.clicks.list();
+      // Take only the 10 most recent clicks
+      setRecentClicks(clicks.slice(0, 10));
 
       // Calculate stats
-      const allUserLinks = await blink.db.links.list({
-        where: { userId: user.id },
-      });
+      const allUserLinks = await mockApi.links.list({ userId: user.id });
 
       const totalClicks = allUserLinks.reduce(
-        (sum, link) => sum + Number(link.clickCount),
+        (sum: number, link: Link) => sum + Number(link.clickCount),
         0
       );
       const activeLinks = allUserLinks.filter(
-        (link) => Number(link.isActive) > 0
+        (link: Link) => Number(link.isActive) > 0
       ).length;
 
       // Calculate clicks today (simplified)
       const today = new Date().toISOString().split("T")[0];
-      const todayClicks = clicks.filter((click) =>
+      const todayClicks = clicks.filter((click: LinkClick) =>
         click.clickedAt.startsWith(today)
       ).length;
 

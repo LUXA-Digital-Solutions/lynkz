@@ -32,7 +32,7 @@ import {
   SortDesc,
   Plus,
 } from "lucide-react";
-import blink from "@/blink/client";
+import { mockApi } from "@/mocks/api";
 import type { Link } from "@/types";
 
 interface LinksManagerProps {
@@ -56,11 +56,8 @@ export function LinksManager({ className }: LinksManagerProps) {
 
   const loadLinks = async () => {
     try {
-      const user = await blink.auth.me();
-      const userLinks = await blink.db.links.list({
-        where: { userId: user.id },
-        orderBy: { [sortField]: sortDirection },
-      });
+      const user = await mockApi.auth.me();
+      const userLinks = await mockApi.links.list({ userId: user.id });
       setLinks(userLinks);
     } catch (error) {
       console.error("Error loading links:", error);
@@ -92,7 +89,7 @@ export function LinksManager({ className }: LinksManagerProps) {
 
   const deleteLink = async (linkId: string) => {
     try {
-      await blink.db.links.delete(linkId);
+      await mockApi.links.delete(linkId);
       setLinks(links.filter((link) => link.id !== linkId));
       toast({
         title: "Link deleted",
@@ -116,7 +113,7 @@ export function LinksManager({ className }: LinksManagerProps) {
         updatedAt: new Date().toISOString(),
       };
 
-      await blink.db.links.update(link.id, {
+      await mockApi.links.update(link.id, {
         isActive: updatedLink.isActive,
         updatedAt: updatedLink.updatedAt,
       });
@@ -149,7 +146,7 @@ export function LinksManager({ className }: LinksManagerProps) {
     loadLinks();
   };
 
-  const filteredLinks = links.filter((link) => {
+  const filteredLinks = links.filter((link: Link) => {
     const query = searchQuery.toLowerCase();
     return (
       link.title?.toLowerCase().includes(query) ||

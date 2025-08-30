@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -21,8 +19,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
   Area,
   AreaChart,
 } from "recharts";
@@ -36,8 +32,8 @@ import {
   Users,
   Eye,
 } from "lucide-react";
-import blink from "@/blink/client";
-import type { Link, LinkClick } from "@/types";
+import { mockApi } from "@/mocks/api";
+import type { Link, LinkClick, AnalyticsData } from "@/types";
 
 interface AnalyticsProps {
   className?: string;
@@ -48,6 +44,17 @@ export function Analytics({ className }: AnalyticsProps) {
   const [clicks, setClicks] = useState<LinkClick[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("7d");
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
+    totalLinks: 0,
+    totalClicks: 0,
+    clickRate: 0,
+    topLinks: [],
+    recentClicks: [],
+    clicksByDate: [],
+    clicksByCountry: [],
+    clicksByDevice: [],
+    clicksByReferrer: [],
+  });
 
   const [stats, setStats] = useState({
     totalClicks: 0,
@@ -60,41 +67,106 @@ export function Analytics({ className }: AnalyticsProps) {
     loadAnalyticsData();
   }, [timeRange]);
 
+  const processClicksByDate = (clicks: LinkClick[]) => {
+    const days = 7;
+    const result = [];
+
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split("T")[0];
+
+      const clicksOnDate = clicks.filter((click) =>
+        click.clickedAt.startsWith(dateStr)
+      ).length;
+
+      result.push({ date: dateStr, clicks: clicksOnDate });
+    }
+
+    return result;
+  };
+
+  const processClicksByCountry = (clicks: LinkClick[]) => {
+    const countryMap = new Map<string, number>();
+
+    clicks.forEach((click) => {
+      const country = click.country || "Unknown";
+      countryMap.set(country, (countryMap.get(country) || 0) + 1);
+    });
+
+    return Array.from(countryMap.entries())
+      .map(([country, clicks]) => ({ country, clicks }))
+      .sort((a, b) => b.clicks - a.clicks);
+  };
+
+  const processClicksByDevice = (clicks: LinkClick[]) => {
+    const deviceMap = new Map<string, number>();
+
+    clicks.forEach((click) => {
+      const device = click.deviceType || "Unknown";
+      deviceMap.set(device, (deviceMap.get(device) || 0) + 1);
+    });
+
+    return Array.from(deviceMap.entries()).map(([device, clicks]) => ({
+      device,
+      clicks,
+    }));
+  };
+
+  const processClicksByReferrer = (clicks: LinkClick[]) => {
+    const referrerMap = new Map<string, number>();
+
+    clicks.forEach((click) => {
+      const referrer = click.referrer || "Direct";
+      referrerMap.set(referrer, (referrerMap.get(referrer) || 0) + 1);
+    });
+
+    return Array.from(referrerMap.entries())
+      .map(([referrer, clicks]) => ({ referrer, clicks }))
+      .sort((a, b) => b.clicks - a.clicks);
+  };
+
   const loadAnalyticsData = async () => {
     try {
-      const user = await blink.auth.me();
+      const user = await mockApi.auth.me();
 
-      // Load user's links
-      const userLinks = await blink.db.links.list({
-        where: { userId: user.id },
-      });
-      setLinks(userLinks);
+      // Get links data
+      const links = await mockApi.links.list({ userId: user.id });
 
-      // Load clicks for these links
-      const allClicks = await blink.db.linkClicks.list({
-        orderBy: { clickedAt: "desc" },
-        limit: 1000, // Get more data for analytics
+      // Get clicks data
+      const clicks = await mockApi.clicks.list({
+        linkId: links.map((link: Link) => link.id),
       });
 
-      // Filter clicks for user's links
-      const linkIds = userLinks.map((link) => link.id);
-      const userClicks = allClicks.filter((click) =>
-        linkIds.includes(click.linkId)
-      );
-      setClicks(userClicks);
+      // Process the data into analytics format
+      const analytics: AnalyticsData = {
+        totalLinks: links.length,
+        totalClicks: clicks.length,
+        clickRate: links.length ? clicks.length / links.length : 0,
+        topLinks: [...links]
+          .sort((a, b) => b.clickCount - a.clickCount)
+          .slice(0, 5),
+        recentClicks: clicks.slice(0, 10),
+        clicksByDate: processClicksByDate(clicks),
+        clicksByCountry: processClicksByCountry(clicks),
+        clicksByDevice: processClicksByDevice(clicks),
+        clicksByReferrer: processClicksByReferrer(clicks),
+      };
 
-      // Calculate stats
-      const totalClicks = userClicks.length;
-      const uniqueIPs = new Set(userClicks.map((click) => click.ipAddress))
-        .size;
-      const avgClicksPerLink =
-        userLinks.length > 0 ? totalClicks / userLinks.length : 0;
+      setAnalyticsData(analytics);
+      setLinks(analytics.topLinks);
+      setClicks(analytics.recentClicks);
 
+      // Update stats
       setStats({
-        totalClicks,
-        uniqueClicks: uniqueIPs,
-        totalLinks: userLinks.length,
-        avgClicksPerLink: Math.round(avgClicksPerLink * 10) / 10,
+        totalClicks: analytics.totalClicks,
+        uniqueClicks: new Set(
+          analytics.recentClicks.map((click) => click.ipAddress)
+        ).size,
+        totalLinks: analytics.totalLinks,
+        avgClicksPerLink:
+          Math.round((analytics.totalClicks / analytics.totalLinks) * 10) /
+            10 || 0,
       });
     } catch (error) {
       console.error("Error loading analytics:", error);

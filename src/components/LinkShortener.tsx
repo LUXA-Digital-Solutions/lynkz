@@ -25,7 +25,7 @@ import {
   Zap,
 } from "lucide-react";
 import QRCode from "react-qr-code";
-import blink from "@/blink/client";
+import { mockApi } from "@/mocks/api";
 import type { LinkFormData } from "@/types";
 
 const linkSchema = z.object({
@@ -71,26 +71,17 @@ export function LinkShortener({ onLinkCreated }: LinkShortenerProps) {
   const onSubmit = async (data: LinkFormData) => {
     setLoading(true);
     try {
-      const user = await blink.auth.me();
+      const user = await mockApi.auth.me();
 
       const shortCode = data.customAlias || generateShortCode();
-      const linkId = `link_${Date.now()}`;
 
-      const newLink = {
-        id: linkId,
-        userId: user.id,
+      const newLink = await mockApi.links.create({
         originalUrl: data.originalUrl,
         shortCode,
         customAlias: data.customAlias,
         title: data.title,
         description: data.description,
-        clickCount: 0,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      await blink.db.links.create(newLink);
+      });
 
       const fullShortUrl = `${window.location.origin}/${shortCode}`;
       setShortenedLink(fullShortUrl);

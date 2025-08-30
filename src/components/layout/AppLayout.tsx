@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -15,12 +14,19 @@ import {
   Home,
   Zap,
 } from "lucide-react";
-import blink from "@/blink/client";
+import { mockAuth } from "@/mocks/auth";
 import type { User } from "@/types";
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  currentPage?: "dashboard" | "links" | "analytics" | "settings";
+  currentPage?:
+    | "dashboard"
+    | "links"
+    | "analytics"
+    | "settings"
+    | "features"
+    | "pricing"
+    | "about";
 }
 
 export function AppLayout({
@@ -30,34 +36,79 @@ export function AppLayout({
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = blink.auth.onAuthStateChanged((state) => {
+    const unsubscribe = mockAuth.onAuthStateChanged((state) => {
       setUser(state.user);
-      setLoading(state.isLoading);
+      setIsLoading(state.isLoading);
     });
     return unsubscribe;
   }, []);
 
   const handleSignIn = () => {
-    blink.auth.login(window.location.href);
+    mockAuth.login(window.location.href);
   };
 
   const handleSignOut = () => {
-    blink.auth.logout("/");
+    mockAuth.logout("/");
+  };
+
+  const handleNavigation = (href: string) => {
+    setSidebarOpen(false);
+    window.location.hash = href.substring(1); // Remove the # from the href
   };
 
   const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: Home, href: "#dashboard" },
-    { id: "links", label: "Links", icon: Link, href: "#links" },
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: Home,
+      href: "#dashboard",
+      protected: true,
+    },
+    {
+      id: "links",
+      label: "Links",
+      icon: Link,
+      href: "#links",
+      protected: true,
+    },
     {
       id: "analytics",
       label: "Analytics",
       icon: BarChart3,
       href: "#analytics",
+      protected: true,
     },
-    { id: "settings", label: "Settings", icon: Settings, href: "#settings" },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      href: "#settings",
+      protected: true,
+    },
+    {
+      id: "features",
+      label: "Features",
+      icon: Zap,
+      href: "#features",
+      protected: false,
+    },
+    {
+      id: "pricing",
+      label: "Pricing",
+      icon: Plus,
+      href: "#pricing",
+      protected: false,
+    },
+    {
+      id: "about",
+      label: "About",
+      icon: Home,
+      href: "#about",
+      protected: false,
+    },
   ];
 
   const SidebarContent = () => (
@@ -76,25 +127,28 @@ export function AppLayout({
 
       <nav className="flex-1 px-4 py-6">
         <div className="space-y-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentPage === item.id;
-            return (
-              <a
-                key={item.id}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <Icon className="h-4 w-4" />
-                {item.label}
-              </a>
-            );
-          })}
+          {navItems
+            .filter(
+              (item) => (item.protected && user) || (!item.protected && !user)
+            )
+            .map((item) => {
+              const Icon = item.icon;
+              const isActive = currentPage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavigation(item.href)}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left ${
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </button>
+              );
+            })}
         </div>
       </nav>
 
@@ -136,7 +190,7 @@ export function AppLayout({
     </div>
   );
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex items-center gap-2">

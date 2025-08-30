@@ -1,33 +1,25 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Dashboard } from "@/components/Dashboard";
 import { LinksManager } from "@/components/LinksManager";
 import { Analytics } from "@/components/Analytics";
 import { LandingPage } from "@/components/LandingPage";
+import { Features } from "@/components/pages/Features";
+import { Pricing } from "@/components/pages/Pricing";
+import { About } from "@/components/pages/About";
 import { Toaster } from "@/components/ui/toaster";
-import blink from "@/blink/client";
-import type { User } from "@/types";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<
-    "landing" | "dashboard" | "links" | "analytics" | "settings"
+    | "landing"
+    | "dashboard"
+    | "links"
+    | "analytics"
+    | "settings"
+    | "features"
+    | "pricing"
+    | "about"
   >("landing");
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Auth state management
-  useEffect(() => {
-    const unsubscribe = blink.auth.onAuthStateChanged((state) => {
-      setUser(state.user);
-      setLoading(state.isLoading);
-
-      // Auto-redirect to dashboard if user is authenticated
-      if (state.user && currentPage === "landing") {
-        setCurrentPage("dashboard");
-      }
-    });
-    return unsubscribe;
-  }, [currentPage]);
 
   // Simple routing based on hash
   useEffect(() => {
@@ -37,7 +29,10 @@ function App() {
         hash === "dashboard" ||
         hash === "links" ||
         hash === "analytics" ||
-        hash === "settings"
+        hash === "settings" ||
+        hash === "features" ||
+        hash === "pricing" ||
+        hash === "about"
       ) {
         setCurrentPage(hash);
       } else if (hash === "landing" || hash === "") {
@@ -56,12 +51,15 @@ function App() {
   };
 
   const renderCurrentPage = () => {
-    if (currentPage === "landing") {
-      return <LandingPage onGetStarted={handleGetStarted} />;
-    }
-
-    // Protected pages - wrap in AppLayout
     switch (currentPage) {
+      case "landing":
+        return <LandingPage onGetStarted={handleGetStarted} />;
+      case "features":
+        return <Features />;
+      case "pricing":
+        return <Pricing />;
+      case "about":
+        return <About />;
       case "dashboard":
         return <Dashboard currentPage={currentPage} />;
       case "links":
@@ -89,10 +87,14 @@ function App() {
     }
   };
 
-  if (currentPage === "landing") {
+  const isPublicPage = ["landing", "features", "pricing", "about"].includes(
+    currentPage
+  );
+
+  if (isPublicPage) {
     return (
       <>
-        <LandingPage onGetStarted={handleGetStarted} />
+        {renderCurrentPage()}
         <Toaster />
       </>
     );
@@ -100,7 +102,13 @@ function App() {
 
   return (
     <>
-      <AppLayout currentPage={currentPage}>{renderCurrentPage()}</AppLayout>
+      <AppLayout
+        currentPage={
+          currentPage as "dashboard" | "links" | "analytics" | "settings"
+        }
+      >
+        {renderCurrentPage()}
+      </AppLayout>
       <Toaster />
     </>
   );
