@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { mockAuth } from "@/mocks/auth";
 import type { User } from "@/types";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -114,14 +115,17 @@ export function AppLayout({
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="border-b px-6 py-4">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground font-bold">
-            L
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground font-bold">
+              L
+            </div>
+            <span className="font-bold text-xl">Lynkz</span>
+            <Badge variant="secondary" className="text-xs">
+              Pro
+            </Badge>
           </div>
-          <span className="font-bold text-xl">Lynkz</span>
-          <Badge variant="secondary" className="text-xs">
-            Pro
-          </Badge>
+          <ThemeToggle />
         </div>
       </div>
 
@@ -156,19 +160,23 @@ export function AppLayout({
         {user ? (
           <div className="space-y-3">
             <div className="flex items-center gap-3 px-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatar} />
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {user.displayName || "User"}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {user.email}
-                </p>
+              <div className="flex items-center gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.avatar} />
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {user.displayName?.charAt(0) ||
+                      user.email?.charAt(0) ||
+                      "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {user.displayName || "User"}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user.email}
+                  </p>
+                </div>
               </div>
             </div>
             <Button

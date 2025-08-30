@@ -8,8 +8,8 @@ const authSubscribers = new Set<
 
 export const mockAuth = {
   // Current user state
-  currentUser: mockUser as User | null,
-  isLoading: true,
+  currentUser: null as User | null,
+  isLoading: false,
 
   // Auth state change subscription
   onAuthStateChanged(

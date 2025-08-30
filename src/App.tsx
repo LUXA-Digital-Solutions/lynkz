@@ -8,6 +8,7 @@ import { Features } from "@/components/pages/Features";
 import { Pricing } from "@/components/pages/Pricing";
 import { About } from "@/components/pages/About";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<
@@ -91,26 +92,26 @@ function App() {
     currentPage
   );
 
-  if (isPublicPage) {
-    return (
-      <>
-        {renderCurrentPage()}
-        <Toaster />
-      </>
-    );
-  }
-
   return (
-    <>
-      <AppLayout
-        currentPage={
-          currentPage as "dashboard" | "links" | "analytics" | "settings"
-        }
-      >
-        {renderCurrentPage()}
-      </AppLayout>
-      <Toaster />
-    </>
+    <ThemeProvider>
+      {isPublicPage ? (
+        <>
+          {renderCurrentPage()}
+          <Toaster />
+        </>
+      ) : (
+        <>
+          <AppLayout
+            currentPage={
+              currentPage as "dashboard" | "links" | "analytics" | "settings"
+            }
+          >
+            {renderCurrentPage()}
+          </AppLayout>
+          <Toaster />
+        </>
+      )}
+    </ThemeProvider>
   );
 }
 
