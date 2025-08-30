@@ -61,7 +61,7 @@ function App() {
       case "about":
         return <About />;
       case "dashboard":
-        return <Dashboard currentPage={currentPage} />;
+        return <Dashboard />;
       case "links":
         return <LinksManager />;
       case "analytics":
@@ -83,7 +83,7 @@ function App() {
           </div>
         );
       default:
-        return <Dashboard currentPage="dashboard" />;
+        return <Dashboard />;
     }
   };
 

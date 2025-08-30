@@ -56,6 +56,8 @@ export function Analytics({ className }: AnalyticsProps) {
     clicksByReferrer: [],
   });
 
+  console.log(analyticsData);
+
   const [stats, setStats] = useState({
     totalClicks: 0,
     uniqueClicks: 0,

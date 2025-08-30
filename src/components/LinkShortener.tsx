@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   Collapsible,
@@ -14,16 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  Link2,
-  Copy,
-  QrCode,
-  ChevronDown,
-  Settings,
-  Calendar,
-  Lock,
-  Zap,
-} from "lucide-react";
+import { Link2, Copy, QrCode, ChevronDown, Settings, Zap } from "lucide-react";
 import QRCode from "react-qr-code";
 import { mockApi } from "@/mocks/api";
 import type { LinkFormData } from "@/types";
@@ -51,12 +41,12 @@ export function LinkShortener({ onLinkCreated }: LinkShortenerProps) {
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
+    // watch,
   } = useForm<LinkFormData>({
     resolver: zodResolver(linkSchema),
   });
 
-  const watchedUrl = watch("originalUrl");
+  // const watchedUrl = watch("originalUrl");
 
   const generateShortCode = () => {
     const chars =
@@ -71,7 +61,7 @@ export function LinkShortener({ onLinkCreated }: LinkShortenerProps) {
   const onSubmit = async (data: LinkFormData) => {
     setLoading(true);
     try {
-      const user = await mockApi.auth.me();
+      // const user = await mockApi.auth.me();
 
       const shortCode = data.customAlias || generateShortCode();
 

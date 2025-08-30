@@ -1,59 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Check } from "lucide-react";
 import { plans } from "@/data/plans";
-  {
-    name: "Free",
-    description: "Perfect for trying out Lynkz",
-    price: "$0",
-    priceDescription: "Free forever",
-    features: [
-      "Up to 50 links",
-      "Basic analytics",
-      "Custom aliases",
-      "24-hour click history",
-      "Standard support",
-    ],
-    cta: "Get Started",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    description: "For growing businesses",
-    price: "$19",
-    priceDescription: "per month",
-    features: [
-      "Unlimited links",
-      "Advanced analytics",
-      "Custom domains",
-      "Team collaboration",
-      "API access",
-      "Priority support",
-      "Password protection",
-      "Link expiration",
-    ],
-    cta: "Start Free Trial",
-    highlighted: true,
-  },
-  {
-    name: "Enterprise",
-    description: "For large organizations",
-    price: "Custom",
-    priceDescription: "Contact sales",
-    features: [
-      "Everything in Pro",
-      "Dedicated account manager",
-      "Custom integration",
-      "SLA guarantee",
-      "Advanced security",
-      "Custom analytics",
-      "Training sessions",
-      "24/7 phone support",
-    ],
-    cta: "Contact Sales",
-    highlighted: false,
-  },
-];
 
 export default function Pricing() {
   return (
@@ -63,19 +18,20 @@ export default function Pricing() {
           Simple, Transparent Pricing
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Choose the plan that best fits your needs. All plans include a 14-day free trial.
+          Choose the plan that best fits your needs. All plans include a 14-day
+          free trial.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
         {plans.map((plan, index) => (
-          <Card 
-            key={index} 
-            className={\`\${
-              plan.highlighted 
-                ? "border-primary shadow-lg scale-105" 
+          <Card
+            key={index}
+            className={`${
+              plan.highlighted
+                ? "border-primary shadow-lg scale-105"
                 : "border-border"
-            } relative\`}
+            } relative`}
           >
             <CardHeader>
               <CardTitle className="text-2xl">{plan.name}</CardTitle>
@@ -84,7 +40,9 @@ export default function Pricing() {
             <CardContent>
               <div className="mb-4">
                 <span className="text-4xl font-bold">{plan.price}</span>
-                <span className="text-muted-foreground">/{plan.priceDescription}</span>
+                <span className="text-muted-foreground">
+                  /{plan.priceDescription}
+                </span>
               </div>
               <ul className="space-y-2">
                 {plan.features.map((feature, featureIndex) => (
@@ -96,8 +54,8 @@ export default function Pricing() {
               </ul>
             </CardContent>
             <CardFooter>
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 variant={plan.highlighted ? "default" : "outline"}
               >
                 {plan.cta}

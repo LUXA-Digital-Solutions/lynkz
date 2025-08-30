@@ -7,7 +7,7 @@ export const mockUser = {
 };
 
 // Mock links data
-let mockLinks = [
+export const mockLinks = [
   {
     id: "link_1",
     userId: "user_1",
@@ -46,7 +46,7 @@ let mockLinks = [
 ];
 
 // Mock click data
-let mockClicks = [
+export const mockClicks = [
   {
     id: "click_1",
     linkId: "link_1",

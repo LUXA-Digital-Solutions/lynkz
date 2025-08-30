@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { LinkShortener } from "./LinkShortener";
 import {
   Link2,
@@ -24,11 +23,7 @@ import {
 import { mockApi } from "@/mocks/api";
 import type { Link, LinkClick } from "@/types";
 
-interface DashboardProps {
-  currentPage?: string;
-}
-
-export function Dashboard({ currentPage = "dashboard" }: DashboardProps) {
+export function Dashboard() {
   const [links, setLinks] = useState<Link[]>([]);
   const [recentClicks, setRecentClicks] = useState<LinkClick[]>([]);
   const [loading, setLoading] = useState(true);
