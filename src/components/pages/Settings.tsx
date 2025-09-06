@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -75,50 +76,122 @@ export function Settings() {
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>
-                Update your profile information and avatar
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center gap-6">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={profileImage || ""} />
-                  <AvatarFallback>
-                    {mockUser.displayName?.charAt(0) ||
-                      mockUser.email?.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    // In a real app, this would open a file picker
-                    alert(
-                      "This feature would open a file picker to change your avatar"
-                    );
-                  }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card>
+              <CardHeader>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
                 >
-                  Change Avatar
-                </Button>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input id="name" defaultValue={mockUser.displayName || ""} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    defaultValue={mockUser.email}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                  <CardTitle>Profile Information</CardTitle>
+                  <CardDescription>
+                    Update your profile information and avatar
+                  </CardDescription>
+                </motion.div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <motion.div
+                  className="flex items-center gap-6"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3, type: "spring" }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Avatar className="h-24 w-24 ring-2 ring-primary/20 ring-offset-2">
+                      <AvatarImage src={profileImage || ""} />
+                      <AvatarFallback className="bg-primary/5">
+                        {mockUser.displayName?.charAt(0) ||
+                          mockUser.email?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        // In a real app, this would open a file picker
+                        alert(
+                          "This feature would open a file picker to change your avatar"
+                        );
+                      }}
+                      className="relative overflow-hidden group"
+                    >
+                      <span className="relative z-10">Change Avatar</span>
+                      <motion.div
+                        className="absolute inset-0 bg-primary/5"
+                        initial={{ x: "-100%" }}
+                        whileHover={{ x: "0%" }}
+                        transition={{ type: "spring", stiffness: 100 }}
+                      />
+                    </Button>
+                  </motion.div>
+                </motion.div>
+                <motion.div
+                  className="grid gap-4 md:grid-cols-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <motion.div
+                    className="space-y-2"
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      defaultValue={mockUser.displayName || ""}
+                      className="transition-shadow hover:shadow-md focus:shadow-lg"
+                    />
+                  </motion.div>
+                  <motion.div
+                    className="space-y-2"
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      defaultValue={mockUser.email}
+                      className="transition-shadow hover:shadow-md focus:shadow-lg"
+                    />
+                  </motion.div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex justify-end"
+                >
+                  <Button
+                    className="relative overflow-hidden group"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <span className="relative z-10">Save Changes</span>
+                    <motion.div
+                      className="absolute inset-0 bg-primary/10"
+                      initial={{ x: "-100%" }}
+                      whileHover={{ x: "0%" }}
+                      transition={{ type: "spring", stiffness: 100 }}
+                    />
+                  </Button>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </TabsContent>
 
         <TabsContent value="account" className="space-y-6">

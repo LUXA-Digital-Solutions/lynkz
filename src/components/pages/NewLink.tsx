@@ -10,23 +10,108 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { mockApi } from "@/mocks/api";
+import { Loader2 } from "lucide-react";
 
 export function NewLink() {
   const [linkType, setLinkType] = useState<"single" | "bulk">("single");
   const [longUrl, setLongUrl] = useState("");
   const [customAlias, setCustomAlias] = useState("");
   const [bulkUrls, setBulkUrls] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement link creation
-    console.log("Creating link:", { longUrl, customAlias });
+  const generateShortCode = () => {
+    const chars =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
   };
 
-  const handleBulkSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement bulk link creation
-    console.log("Creating bulk links:", bulkUrls.split("\n"));
+    if (!longUrl) {
+      toast({
+        title: "Error",
+        description: "Please enter a URL to shorten",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const shortCode = customAlias || generateShortCode();
+
+      await mockApi.links.create({
+        originalUrl: longUrl,
+        shortCode,
+        customAlias: customAlias || undefined,
+      });
+
+      toast({
+        title: "Success!",
+        description: "Your link has been created successfully.",
+      });
+
+      // Clear form and redirect to links page
+      setLongUrl("");
+      setCustomAlias("");
+      window.location.hash = "links";
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bulkUrls.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter at least one URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const urls = bulkUrls.split("\n").filter((url) => url.trim());
+
+      for (const url of urls) {
+        await mockApi.links.create({
+          originalUrl: url.trim(),
+          shortCode: generateShortCode(),
+        });
+      }
+
+      toast({
+        title: "Success!",
+        description: `Created ${urls.length} links successfully.`,
+      });
+
+      // Clear form and redirect to links page
+      setBulkUrls("");
+      window.location.hash = "links";
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,8 +158,15 @@ export function NewLink() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full">
-                  Create Link
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Link"
+                  )}
                 </Button>
               </CardFooter>
             </form>
@@ -101,8 +193,15 @@ export function NewLink() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full">
-                  Upload Links
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    "Upload Links"
+                  )}
                 </Button>
               </CardFooter>
             </form>

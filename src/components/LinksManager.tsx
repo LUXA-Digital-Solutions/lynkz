@@ -32,6 +32,8 @@ import {
   SortDesc,
   Plus,
 } from "lucide-react";
+import { EditLinkModal } from "@/components/modals/EditLinkModal";
+import { QRCodeModal } from "@/components/modals/QRCodeModal";
 import { mockApi } from "@/mocks/api";
 import type { Link } from "@/types";
 
@@ -48,6 +50,12 @@ export function LinksManager({ className }: LinksManagerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [editingLink, setEditingLink] = useState<Link | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedLinkForQR, setSelectedLinkForQR] = useState<string | null>(
+    null
+  );
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -363,11 +371,23 @@ export function LinksManager({ className }: LinksManagerProps) {
                                   <ExternalLink className="h-4 w-4" />
                                   Visit Original
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2">
+                                <DropdownMenuItem
+                                  className="gap-2"
+                                  onClick={() => {
+                                    setSelectedLinkForQR(shortUrl);
+                                    setIsQRModalOpen(true);
+                                  }}
+                                >
                                   <QrCode className="h-4 w-4" />
                                   QR Code
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2">
+                                <DropdownMenuItem
+                                  className="gap-2"
+                                  onClick={() => {
+                                    setEditingLink(link);
+                                    setIsEditModalOpen(true);
+                                  }}
+                                >
                                   <Edit className="h-4 w-4" />
                                   Edit
                                 </DropdownMenuItem>
@@ -424,6 +444,23 @@ export function LinksManager({ className }: LinksManagerProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Link Modal */}
+      <EditLinkModal
+        link={editingLink}
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onLinkUpdated={loadLinks}
+      />
+
+      {/* QR Code Modal */}
+      {selectedLinkForQR && (
+        <QRCodeModal
+          url={selectedLinkForQR}
+          open={isQRModalOpen}
+          onOpenChange={setIsQRModalOpen}
+        />
+      )}
     </div>
   );
 }
